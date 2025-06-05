@@ -51,7 +51,10 @@ type UserStatusPredefined = UserStatusBase & {
 
 export type UserStatusPrivate = UserStatusCustom | UserStatusPredefined | UserStatusClean
 
-export type UserStatusPublic = Pick<UserStatusPrivate, 'userId' | 'message' | 'icon' | 'clearAt' | 'status'>
+export type UserStatusPublic = Pick<UserStatusPrivate, 'userId' | 'message' | 'icon' | 'clearAt' | 'status'> & {
+       /** Last seen timestamp in seconds */
+       lastSeen: number | null
+}
 
 export type UserStatus = UserStatusPrivate | UserStatusClean
 

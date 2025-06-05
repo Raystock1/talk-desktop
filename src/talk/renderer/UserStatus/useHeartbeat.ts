@@ -5,8 +5,11 @@
 
 import { createSharedComposable } from '@vueuse/core'
 import { onBeforeUnmount, watch } from 'vue'
+import { getCurrentUser } from '@nextcloud/auth'
 import { useIsAway } from './composables/useIsAway.ts'
 import { useUserStatusStore } from './userStatus.store.ts'
+import { useLastSeenStore } from './lastSeen.store.ts'
+import { fetchUserLastSeen } from './publicUserStatus.service.ts'
 
 // General notes:
 // - Server has INVALIDATE_STATUS_THRESHOLD with 15 minutes, preventing immediate status update on heartbeat request
@@ -37,13 +40,19 @@ export const useHeartbeat = createSharedComposable(() => {
 	/**
 	 * Send a heartbeat
 	 */
-	async function heartbeat() {
-		try {
-			await userStatusStore.updateUserStatusWithHeartbeat(isAway.value)
-		} catch (error) {
-			console.error('Error on heartbeat:', error)
-		}
-	}
+       async function heartbeat() {
+               try {
+                       await userStatusStore.updateUserStatusWithHeartbeat(isAway.value)
+                       const current = getCurrentUser()
+                       if (current) {
+                               const lastSeenStore = useLastSeenStore()
+                               const lastSeen = await fetchUserLastSeen(current.uid)
+                               lastSeenStore.setLastSeen(current.uid, lastSeen)
+                       }
+               } catch (error) {
+                       console.error('Error on heartbeat:', error)
+               }
+       }
 
 	/**
 	 * Start heartbeat interval

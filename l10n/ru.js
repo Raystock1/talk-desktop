@@ -67,6 +67,8 @@ OC.L10N.register(
     "Invisible" : "Невидимка",
     "Offline" : "Не в сети",
     "You missed a call from {user}" : "Вы пропустили вызов от {user}",
-    "You missed a group call in {call}" : "Вы пропустили вызов в обсуждении {call}"
+    "You missed a group call in {call}" : "Вы пропустили вызов в обсуждении {call}",
+    "Last online" : "Был в сети",
+    "Last online {time}" : "Был в сети {time} назад"
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");
