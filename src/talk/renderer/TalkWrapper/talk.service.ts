@@ -5,6 +5,11 @@
 
 import { isNavigationFailure, NavigationFailureType } from '@talk/node_modules/vue-router'
 import { useTalkHashStore } from '@talk/src/stores/talkHash.js'
+import axios from '@nextcloud/axios'
+import { generateOcsUrl } from '@nextcloud/router'
+import { CONVERSATION } from '@talk/src/constants.ts'
+import { useLastSeenStore } from '../UserStatus/lastSeen.store.ts'
+import { fetchUserLastSeen } from '../UserStatus/publicUserStatus.service.ts'
 
 /**
  * Get the Talk instance
@@ -46,13 +51,26 @@ export function openRoot() {
  * @param options.directCall - Use direct call (open media settings to join a call)
  */
 export async function openConversation(token: string, { directCall = false }: { directCall?: boolean } = {}) {
-	await getTalkRouter().push({
-		name: 'conversation',
-		params: { token },
-		hash: directCall ? '#direct-call' : undefined,
-	}).catch(passDuplicatedNavigationError)
+       await getTalkRouter().push({
+               name: 'conversation',
+               params: { token },
+               hash: directCall ? '#direct-call' : undefined,
+       }).catch(passDuplicatedNavigationError)
 
-	await window.TALK_DESKTOP.focusTalk()
+       await window.TALK_DESKTOP.focusTalk()
+
+       try {
+               const response = await axios.get(generateOcsUrl('apps/spreed/api/v4/room/{token}', { token }))
+               const conversation = response.data.ocs.data
+               if (conversation.type === CONVERSATION.TYPE.ONE_TO_ONE || conversation.type === CONVERSATION.TYPE.ONE_TO_ONE_FORMER) {
+                       const otherId = conversation.name
+                       const store = useLastSeenStore()
+                       const lastSeen = await fetchUserLastSeen(otherId)
+                       store.setLastSeen(otherId, lastSeen)
+               }
+       } catch (error) {
+               console.error('Failed to fetch last seen', error)
+       }
 }
 
 /**
